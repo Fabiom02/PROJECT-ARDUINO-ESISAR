@@ -9,10 +9,15 @@
 // - Adafruit Unified Sensor Lib: https://github.com/adafruit/Adafruit_Sensor
 #include <Arduino.h>
 #include "DHT.h"
-#include <TM1637.h>
+#include "TM1637Display.h"
+#include <Adafruit_Sensor.h>
+#include <SoftwareSerial.h>
 
 #define CLK 3
 #define DIO 4
+
+#define rxPin
+#define txPin
 
 #define TEST_DELAY   2000
 
@@ -40,6 +45,7 @@
 // as the current DHT reading algorithm adjusts itself to work on faster procs.
 DHT dht(DHTPIN, DHTTYPE);
 TM1637Display display(CLK, DIO);
+SoftwareSerial MaLiaisonBluetooth(rxPin, txPin);
 
 
   float t_max = 0;
@@ -51,7 +57,8 @@ void setup() {
   pinMode(BUTTON, INPUT);
   
   dht.begin();
-  
+
+  display.setBrightness(7, true);
   display.showNumberDec(0);
 }
 
@@ -98,13 +105,13 @@ void loop() {
   Serial.print(hif);
   Serial.println(F("°F"));
 
-  int timedisplay = (int)(t  
+
 
   if(digitalRead(BUTTON)==HIGH){
     
-    int timedisplay = (int)(t_max * 10);
-    display.shownumberDec(tempDisplay / 10, true, 2,0);
-    display.shownumberDec(tempDisplay % 10, false, 1,2);    
+    int tempDisplay = (int)(t_max * 10);
+    display.showNumberDec(tempDisplay / 10, true, 2,0);
+    display.showNumberDec(tempDisplay % 10, false, 1,2);    
 
     Serial.print(F("Max Humidity: "));
     Serial.print(h_max);
