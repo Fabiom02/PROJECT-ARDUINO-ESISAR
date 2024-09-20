@@ -1,65 +1,53 @@
-
-
-
-// Example testing sketch for various DHT humidity/temperature sensors
-// Written by ladyada, public domain
-
-// REQUIRES the following Arduino libraries:
-// - DHT Sensor Library: https://github.com/adafruit/DHT-sensor-library
-// - Adafruit Unified Sensor Lib: https://github.com/adafruit/Adafruit_Sensor
+// Libraries includes
 #include <Arduino.h>
 #include "DHT.h"
 #include "TM1637Display.h"
 #include <Adafruit_Sensor.h>
 #include <SoftwareSerial.h>
 
+// Define pins of display
 #define CLK 3
 #define DIO 4
 
+// Define pins of bluetooth
 #define rxPin
 #define txPin
 
-#define TEST_DELAY   2000
-
+// Define pin of sensor
 #define DHTPIN 5
-#define BUTTON 8 // Digital pin connected to the DHT sensor
-// Feather HUZZAH ESP8266 note: use pins 3, 4, 5, 12, 13 or 14 --
-// Pin 15 can work but DHT must be disconnected during program upload.
 
-// Uncomment whatever type you're using!
-//#define DHTTYPE DHT11   // DHT 11
-#define DHTTYPE DHT11   // DHT 22  (AM2302), AM2321
-//#define DHTTYPE DHT21   // DHT 21 (AM2301)
+// Define DHT type
+#define DHTTYPE DHT11
 
-// Connect pin 1 (on the left) of the sensor to +5V
-// NOTE: If using a board with 3.3V logic like an Arduino Due connect pin 1
-// to 3.3V instead of 5V!
-// Connect pin 2 of the sensor to whatever your DHTPIN is
-// Connect pin 3 (on the right) of the sensor to GROUND (if your sensor has 3 pins)
-// Connect pin 4 (on the right) of the sensor to GROUND and leave the pin 3 EMPTY (if your sensor has 4 pins)
-// Connect a 10K resistor from pin 2 (data) to pin 1 (power) of the sensor
+// Define pin of button
+#define BUTTON 8 
 
-// Initialize DHT sensor.
-// Note that older versions of this library took an optional third parameter to
-// tweak the timings for faster processors.  This parameter is no longer needed
-// as the current DHT reading algorithm adjusts itself to work on faster procs.
+
+// initialization of sensor, display and bluetooth
 DHT dht(DHTPIN, DHTTYPE);
 TM1637Display display(CLK, DIO);
 SoftwareSerial MaLiaisonBluetooth(rxPin, txPin);
 
+// variables of max temperature and max humidity
+float t_max = 0;
+float h_max = 0;
 
-  float t_max = 0;
-  float h_max = 0;
 
 void setup() {
   Serial.begin(9600);
   Serial.println(F("DHTxx test!"));
   pinMode(BUTTON, INPUT);
-  
+  pinMode(rxPin, INPUT);
+  pinMode(txPin, OUTPUT);
+
   dht.begin();
 
   display.setBrightness(7, true);
   display.showNumberDec(0);
+
+  MaLiaisonBluetooth.begin(38400);
+  Serial.begin(38400);
+
 }
 
 void loop() {
@@ -105,6 +93,18 @@ void loop() {
   Serial.print(hif);
   Serial.println(F("°F"));
 
+  MaLiaisonBluetooth.print(F("Humidity: "));
+  MaLiaisonBluetooth.print(h);
+  MaLiaisonBluetooth.print(F("%  Temperature: "));
+  MaLiaisonBluetooth.print(t);
+  MaLiaisonBluetooth.print(F("°C "));
+  MaLiaisonBluetooth.print(f);
+  MaLiaisonBluetooth.print(F("°F  Heat index: "));
+  MaLiaisonBluetooth.print(hic);
+  MaLiaisonBluetooth.print(F("°C "));
+  MaLiaisonBluetooth.print(hif);
+  MaLiaisonBluetooth.println(F("°F"));
+
 
 
   if(digitalRead(BUTTON)==HIGH){
@@ -118,6 +118,12 @@ void loop() {
     Serial.print(F("% Max Temperature: "));
     Serial.print(t_max);
     Serial.print(F("°C "));
+    
+    MaLiaisonBluetooth.print(F("Max Humidity: "));
+    MaLiaisonBluetooth.print(h_max);
+    MaLiaisonBluetooth.print(F("% Max Temperature: "));
+    MaLiaisonBluetooth.print(t_max);
+    MaLiaisonBluetooth.print(F("°C "));
   
     }
   }
